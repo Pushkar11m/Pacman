@@ -233,7 +233,65 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    #util.raiseNotDefined()
+    currentState = problem.getStartState()
+    nodesVisited = util.Queue()
+
+    "Need to use priority Queue for the nodesToBeVisited variable"
+    nodesToBeVisited = util.PriorityQueue()
+    currentPos = currentState
+    costToCurrentNode = 0
+    costMap = {}
+    costMap[currentPos] = costToCurrentNode + heuristic(currentPos,problem)
+    parent = {}
+    direction = {}
+    # pdb.set_trace()
+
+    "Start UCS implementation"
+    while not problem.isGoalState(currentPos):
+        # print 'Current State is :',currentPos
+        nodesVisited.push(currentPos)
+        currentSuccessors = problem.getSuccessors(currentPos)
+        # print 'Current Successors are :',currentSuccessors
+
+        "Loop through all successors of current node"
+        for successor in currentSuccessors:
+            if successor[0] in nodesVisited.list:
+                continue
+            elif successor[0] in (val[2] for val in nodesToBeVisited.heap):
+                costToCurrentSuccessor = costToCurrentNode + successor[2] + heuristic(successor[0],problem)
+                if costToCurrentSuccessor < costMap[successor[0]]:
+                    parent[successor[0]] = currentPos
+                    direction[successor[0]] = successor[1]
+                continue
+
+            else:
+                "Update the cost to successors"
+                costToCurrentSuccessor = costToCurrentNode + successor[2] +  heuristic(successor[0],problem)
+                costMap[successor[0]] = costToCurrentSuccessor
+
+                "Add successor to the nodesToBeVisited priority Queue"
+                nodesToBeVisited.push(successor[0], costToCurrentSuccessor)
+                parent[successor[0]] = currentPos
+                direction[successor[0]] = successor[1]
+        "Choose new node"
+        currentPos = nodesToBeVisited.pop();
+        costToCurrentNode = costMap[currentPos]
+    goal = currentPos
+    # print 'Final current position is :',currentPos
+    path = []
+    way = []
+    current = goal
+
+    "Get the path by retracing"
+    while current != problem.getStartState():
+        path.append(current)
+        way.append(direction[current])
+        current = parent[current]
+    path.append(problem.getStartState())
+    path.reverse()
+    way.reverse()
+    return way
 
 
 # Abbreviations
