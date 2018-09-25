@@ -502,7 +502,40 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+
+
+    # print position
+    # print foodGrid
+    # print foodGrid.asList()
+
+    "*** YOUR CODE HERE ***"
+
+    '''#first try:
+    foodList = foodGrid.asList()
+    return len(foodList)*10'''
+
+    # second try:
+    if not problem.goal:
+        if not foodGrid.asList():
+            return 0
+        else:
+            problem.goal = problem.getGoal(state)
+    xy1 = position
+    xy2 = problem.goal
+    return ((xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2) ** 0.5
+
+    '''#third try:
+    gs = problem.startingGameState
+    foodList = foodGrid.asList()
+    foodCount = len(foodList)
+    min_dis = 1000000
+    for i in range(foodCount):
+        dis = mazeDistance(position, foodList[i], gs)
+        if dis < min_dis:
+            min_dis = dis
+    return min_dis+foodCount-1'''
+    # return 0
+    #return 0
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -533,7 +566,32 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        problem.isGoalState(startPosition)
+
+        theFringe = util.Queue();
+        expanded = set();
+        theFringe.push((problem.getStartState(), [], 0));
+
+        while not theFringe.isEmpty():
+
+            popState, popMoves, popCost = theFringe.pop();
+
+            if (popState in expanded):
+                continue;
+
+            if problem.isGoalState(popState):
+                return popMoves;
+
+            expanded.add(popState);
+
+            for state, direction, cost in problem.getSuccessors(popState):
+                if (state in expanded):
+                    continue;
+                theFringe.push((state, popMoves + [direction], popCost));
+
+        return [];
+
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -566,10 +624,12 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         The state is Pacman's position. Fill this in with a goal test that will
         complete the problem definition.
         """
-        x,y = state
+
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #util.raiseNotDefined()
+        x, y = state
+        return self.food[x][y] == True
 
 def mazeDistance(point1, point2, gameState):
     """
