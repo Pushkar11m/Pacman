@@ -500,42 +500,20 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    position, foodGrid = state
+    pacmanPosition, foodGrid = state
     "*** YOUR CODE HERE ***"
 
+    maxDistance = 0
+    for foodPosition in foodGrid.asList():
+        xy1 = foodPosition
+        xy2 = pacmanPosition
+        # distance = myMazeDistance(xy1, xy2, problem)
+        distance = (abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1]))
 
-    # print position
-    # print foodGrid
-    # print foodGrid.asList()
+        if distance > maxDistance:
+            maxDistance = distance
 
-    "*** YOUR CODE HERE ***"
-
-    '''#first try:
-    foodList = foodGrid.asList()
-    return len(foodList)*10'''
-
-    # second try:
-    if not problem.goal:
-        if not foodGrid.asList():
-            return 0
-        else:
-            problem.goal = problem.getGoal(state)
-    xy1 = position
-    xy2 = problem.goal
-    return ((xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2) ** 0.5
-
-    '''#third try:
-    gs = problem.startingGameState
-    foodList = foodGrid.asList()
-    foodCount = len(foodList)
-    min_dis = 1000000
-    for i in range(foodCount):
-        dis = mazeDistance(position, foodList[i], gs)
-        if dis < min_dis:
-            min_dis = dis
-    return min_dis+foodCount-1'''
-    # return 0
-    #return 0
+    return maxDistance
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
