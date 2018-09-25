@@ -18,7 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
-
+import heapq
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -234,64 +234,39 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
     #util.raiseNotDefined()
-    currentState = problem.getStartState()
-    nodesVisited = util.Queue()
+    def _update(Frontier, item, priority):
+        for index, (p, c, i) in enumerate(Frontier.heap):
+            if i[0] == item[0]:
+                if p <= priority:
+                    break
+                del Frontier.heap[index]
+                Frontier.heap.append((priority, c, item))
+                heapq.heapify(Frontier.heap)
+                break
+        else:
+            Frontier.push(item, priority)
 
-    "Need to use priority Queue for the nodesToBeVisited variable"
-    nodesToBeVisited = util.PriorityQueue()
-    currentPos = currentState
-    costToCurrentNode = 0
-    costMap = {}
-    costMap[currentPos] = costToCurrentNode + heuristic(currentPos,problem)
-    parent = {}
-    direction = {}
-    # pdb.set_trace()
+    Frontier = util.PriorityQueue()
+    Visited = []
+    Frontier.push((problem.getStartState(), []), heuristic(problem.getStartState(), problem))
+    Visited.append(problem.getStartState())
 
-    "Start UCS implementation"
-    while not problem.isGoalState(currentPos):
-        # print 'Current State is :',currentPos
-        nodesVisited.push(currentPos)
-        currentSuccessors = problem.getSuccessors(currentPos)
-        # print 'Current Successors are :',currentSuccessors
+    while Frontier.isEmpty() == 0:
+        state, actions = Frontier.pop()
+        # print state
+        if problem.isGoalState(state):
+            # print 'Find Goal'
+            return actions
 
-        "Loop through all successors of current node"
-        for successor in currentSuccessors:
-            if successor[0] in nodesVisited.list:
-                continue
-            elif successor[0] in (val[2] for val in nodesToBeVisited.heap):
-                costToCurrentSuccessor = costToCurrentNode + successor[2] + heuristic(successor[0],problem)
-                if costToCurrentSuccessor < costMap[successor[0]]:
-                    parent[successor[0]] = currentPos
-                    direction[successor[0]] = successor[1]
-                continue
+        if state not in Visited:
+            Visited.append(state)
 
-            else:
-                "Update the cost to successors"
-                costToCurrentSuccessor = costToCurrentNode + successor[2] +  heuristic(successor[0],problem)
-                costMap[successor[0]] = costToCurrentSuccessor
-
-                "Add successor to the nodesToBeVisited priority Queue"
-                nodesToBeVisited.push(successor[0], costToCurrentSuccessor)
-                parent[successor[0]] = currentPos
-                direction[successor[0]] = successor[1]
-        "Choose new node"
-        currentPos = nodesToBeVisited.pop();
-        costToCurrentNode = costMap[currentPos]
-    goal = currentPos
-    # print 'Final current position is :',currentPos
-    path = []
-    way = []
-    current = goal
-
-    "Get the path by retracing"
-    while current != problem.getStartState():
-        path.append(current)
-        way.append(direction[current])
-        current = parent[current]
-    path.append(problem.getStartState())
-    path.reverse()
-    way.reverse()
-    return way
+        for next in problem.getSuccessors(state):
+            n_state = next[0]
+            n_direction = next[1]
+            if n_state not in Visited:
+                _update(Frontier, (n_state, actions + [n_direction]), \
+                        problem.getCostOfActions(actions + [n_direction]) + heuristic(n_state, problem))
 
 
 # Abbreviations
